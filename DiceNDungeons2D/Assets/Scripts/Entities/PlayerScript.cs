@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using UI;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.Tilemaps;
@@ -10,6 +11,8 @@ namespace Entities
     public class PlayerScript : Entity
     {
         public float moveSpeed;
+
+        public GameObject uiCanvas;
 
         // Use this for initialization
         void Start()
@@ -72,6 +75,19 @@ namespace Entities
             {
                 moves--;
                 GameManager.Instance.UpdateUI();
+            }
+        }
+
+        private void CheckUiUpdates(SkillPanel s)
+        {
+            Transform movesDice = s.transform.Find("Content/DiceHolderPanel/DiceHolder(Clone)/DiceSlot");
+            if(movesDice != null) {
+                var moveDice = movesDice.GetComponentInChildren<DiceScript>();
+                if (moveDice != null)
+                {
+                    maxMoves = moves = moveDice.value;
+                    GameManager.Instance.UpdateUI();
+                }
             }
         }
 
