@@ -1,9 +1,12 @@
+
+using Utilities;
+
 namespace UI
 {
     public enum DiceType
     {
-        Range,
-        Strength,
-        AoE
+        [Description("Range")] Range,
+        [Description("Strength")] Strength,
+        [Description("Area of Effect")] AreaOfEffect
     }
 }

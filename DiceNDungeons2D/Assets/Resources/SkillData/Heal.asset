@@ -9,11 +9,13 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 92f6705c95f9469458dd668d86128d79, type: 3}
-  m_Name: Melee
+  m_Name: Heal
   m_EditorClassIdentifier: 
-  internalName: MeleeSkill
-  title: Melee
-  description: Attack a neighboring tile. Strength roll determines damage done.
-  target: 
-  type: 2
+  internalName: Heal
+  title: Heal
+  description: Heals you based on the strength number
+  isRanged: 0
+  type: 3
   dice: 01000000
+  limitations: 00000000
+  castOnSelf: 1

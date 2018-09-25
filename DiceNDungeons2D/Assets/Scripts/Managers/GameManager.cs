@@ -1,7 +1,9 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using Entities;
+using Skills;
 using TMPro;
+using UI;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 using UnityEngine.UI;
@@ -14,13 +16,24 @@ public class GameManager : Manager<GameManager>
     public int playerMoveDistance;
     public bool showMoveDistance;
 
+    public Dictionary<SkillType, Skill> skills = new Dictionary<SkillType, Skill>
+    {
+        {SkillType.Fireball, new SkillFireball()}, 
+        {SkillType.Healing, new SkillHealing()}, 
+        {SkillType.Movement, new SkillMovement()}, 
+        {SkillType.Melee, new SkillMelee()}, 
+    };
+
     public Camera cam;
 
     public GameObject uiCanvas;
-    public Transform dicePrefab;
     
     public void Start()
     {
+        if (playerGO == null)
+        {
+            playerGO = FindObjectOfType<PlayerScript>().gameObject;
+        }
         player = playerGO.GetComponent<PlayerScript>();
         UpdateUI();
     }
@@ -51,6 +64,11 @@ public class GameManager : Manager<GameManager>
         foreach (Entity e in LevelManager.Instance.activeEnemies)
         {
             e.DoTurn();
+            
+        }
+
+        foreach (Entity e in LevelManager.Instance.activeEnemies)
+        {
             while (!e.done)
             {
                 yield return new WaitForEndOfFrame();

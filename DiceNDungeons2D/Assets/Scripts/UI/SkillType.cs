@@ -5,5 +5,6 @@ namespace UI
         Movement,
         Fireball,
         Melee,
+        Healing
     }
 }

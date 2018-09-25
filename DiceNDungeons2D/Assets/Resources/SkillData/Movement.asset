@@ -9,11 +9,12 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 92f6705c95f9469458dd668d86128d79, type: 3}
-  m_Name: MovementSkill
+  m_Name: Movement
   m_EditorClassIdentifier: 
   internalName: movement
   title: Movement
   description: Each dice pip allows you to move one tile
-  target: 
+  isRanged: 0
   type: 0
   dice: 00000000
+  limitations: 00000000

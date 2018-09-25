@@ -12,7 +12,7 @@ public class EnemyTile : Tile
 		base.GetTileData(location, tileMap, ref tileData);
 		component = tileData.gameObject.GetComponent<EnemyTileComponent>();
 		component.tile = this;
-		component.position = location;
+		component.tilePos = location;
 	}
 	
 

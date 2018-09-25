@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using Pathfinding;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
@@ -17,6 +18,10 @@ namespace Entities
         public Vector3 positionFix;
         public SpriteRenderer spriteRenderer;
         public bool done;
+        public bool isActive;
+        
+        public Vector3Int tilePos;
+        private bool isDead;
 
         public void Start()
         {
@@ -26,6 +31,36 @@ namespace Entities
             }
 
             positionFix = new Vector3(spriteRenderer.bounds.extents.x, 0);
+            transform.position += positionFix;
+            SetZPosition();
+        }
+        
+        
+        public void ModifyHp(int dieValue)
+        {
+            hp -= dieValue;
+            if (hp < 0)
+            {
+                Die();
+            }
+        }
+
+        public void Die()
+        {
+            if (this is PlayerScript) return;
+            isDead = true;
+        }
+
+        public virtual void Update()
+        {
+            
+            tilePos = LevelManager.Instance.floorMap.WorldToCell(transform.position);
+
+            if (isDead) {LevelManager.Instance.activeEnemies.Remove(this);
+                //LevelManager.Instance.activeEnemies.Remove(this);
+                //DestroyImmediate(this.gameObject);
+                transform.gameObject.SetActive(false);
+                Destroy(this.gameObject);}
         }
 
         public bool Move(MoveDirection dir)
@@ -36,11 +71,17 @@ namespace Entities
 
             if (LevelManager.Instance.floorMap.HasTile(target))
             {
-                transform.position = LevelManager.Instance.floorMap.CellToWorld(target) + positionFix;
+                transform.position = LevelManager.Instance.floorMap.CellToWorld(target) + positionFix + Vector3.back;
+                tilePos = GetCurrentPosition();
                 return true;
             }
 
             return false;
+        }
+
+        public void SetZPosition()
+        {
+            transform.position.Set(transform.position.x, transform.position.y, -1);
         }
 
         public Vector3Int GetCurrentPosition()
@@ -59,44 +100,44 @@ namespace Entities
         {
         }
 
-        public List<Vector3Int> FindPath(Vector3Int targetTile)
+        public List<NodeWithCost<Vector3Int>> FindPath(Vector3Int targetTile)
         {
             return FindPathFrom(GetCurrentPosition(), targetTile);
         }
 
-        public List<Vector3Int> FindPathFrom(Vector3Int fromTile, Vector3Int targetTile)
+        public List<NodeWithCost<Vector3Int>> FindPathFrom(Vector3Int fromTile, Vector3Int targetTile)
         {
             AStarSearch search = new AStarSearch(LevelManager.Instance.grid,
-                GetCurrentPosition(), targetTile);
+                fromTile, targetTile);
             return search.FindPath();
         }
 
-        protected void TryMove(List<Vector3Int> path)
+        public void TryMove(List<NodeWithCost<Vector3Int>> path)
         {
             if (path.Count > 0)
             {
                 if (moves > 0)
                 {
                     path.Reverse();
-                    path.Add(GetCurrentPosition());
+                    path.Add(new NodeWithCost<Vector3Int>(GetCurrentPosition(), 0));
                     path.Reverse();
-                    StartCoroutine((IEnumerator) MoveToTarget(path));
+                    StartCoroutine(MoveToTarget(path));
                 }
             }
         }
 
-        public IEnumerator MoveToTarget(List<Vector3Int> path)
+        public IEnumerator MoveToTarget(List<NodeWithCost<Vector3Int>> path)
         {
             if (moves <= 0) yield break;
             done = false;
             while (moves > 0 && path.Count > 0)
             {
-                var from = Vector3Int.zero;
-                var to = Vector3Int.zero;
+                NodeWithCost<Vector3Int> from;
+                NodeWithCost<Vector3Int> to;
 
                 if (path.Count <= 1)
                 {
-                    from = GetCurrentPosition();
+                    from =  new NodeWithCost<Vector3Int>(GetCurrentPosition(),0);
                     to = path[0];
                 }
                 else
@@ -104,20 +145,29 @@ namespace Entities
                     from = path[0];
                     to = path[1];
                 }
+                
+                if(to.cost > 10) yield break;
 
-                Move((to - from).ToMoveDirection());
+                Move((to.node - from.node).ToMoveDirection());
                 path.RemoveAt(0);
+                
                 moves--;
+                
                 if (moves <= 0)
                 {
-                    done = true;
-                    moves = maxMoves;
+                 
                     yield break;
                 }
 
-                GameManager.Instance.UpdateUI();
+                if(this is PlayerScript) GameManager.Instance.UpdateUI();
                 yield return new WaitForSeconds(0.3f);
             }
+        }
+        
+        
+        public void SetGridPosition(Vector3Int pos)
+        {
+            transform.position = LevelManager.Instance.floorMap.CellToWorld(pos) + positionFix;
         }
 
         public void OnGUI()

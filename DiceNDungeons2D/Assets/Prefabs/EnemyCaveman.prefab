@@ -35,7 +35,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1544465511374494}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: -1}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
@@ -59,8 +59,9 @@ MonoBehaviour:
   positionFix: {x: 0, y: 0, z: 0}
   spriteRenderer: {fileID: 212205283223796608}
   done: 0
-  tile: {fileID: 11400000, guid: ccc2c44a8cff9184391b738bd806b103, type: 2}
+  isActive: 0
   position: {x: 11, y: 14, z: 0}
+  tile: {fileID: 11400000, guid: ccc2c44a8cff9184391b738bd806b103, type: 2}
 --- !u!212 &212205283223796608
 SpriteRenderer:
   m_ObjectHideFlags: 1

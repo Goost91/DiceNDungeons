@@ -31,4 +31,6 @@ public class Manager<T> : MonoBehaviour where T : Manager<T>
 		instance = FindObjectOfType(typeof(T)) as T;
 		className = typeof(T).ToString();
 	}
+	
+	
 }

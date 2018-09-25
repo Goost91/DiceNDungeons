@@ -18,18 +18,17 @@ public class DiceScript : MonoBehaviour, IDragHandler, IEndDragHandler, IPointer
     public Vector2 origin;
 
     public GameObject dicePanel;
-    public GraphicRaycaster gr;
     public Vector3 loc;
 
     public bool isLocked;
     public bool canRoll;
 
     public Transform newParent;
+    public DiceType type;
 
     // Use this for initialization
     void Start()
     {
-        gr = GetComponent<GraphicRaycaster>();
     }
 
     // Update is called once per frame
@@ -74,19 +73,24 @@ public class DiceScript : MonoBehaviour, IDragHandler, IEndDragHandler, IPointer
         if (transform.parent.gameObject.name.Contains("DiceSlot")) return;
 
         if (eventData.pointerEnter == null ||
-            (newParent != null && newParent.name != "DicePanel" && newParent.GetComponentInChildren<DiceScript>() != null))
+            (newParent != null && newParent.name != "DicePanel" &&
+             newParent.GetComponentInChildren<DiceScript>() != null))
         {
             transform.position = origin;
         }
         else
         {
-            transform.parent = newParent;
             if (newParent.name.Contains("DiceSlot"))
             {
+                var diceHolder = newParent.parent.GetComponent<DiceHolder>();
+                if (!CheckDiceLimitSatisfied(diceHolder)) return;
                 isLocked = true;
                 var skillPanel = newParent.parent.parent.parent.parent.GetComponent<SkillPanel>();
-                GameManager.Instance.player.SendMessage("CheckUiUpdates", skillPanel);
+                transform.parent = newParent;
+                GameManager.Instance.player.CheckUiUpdates(skillPanel);
             }
+
+            transform.parent = newParent;
         }
 
         if (!RectTransformUtility.RectangleContainsScreenPoint(transform.parent.GetComponent<RectTransform>(),
@@ -97,9 +101,42 @@ public class DiceScript : MonoBehaviour, IDragHandler, IEndDragHandler, IPointer
         }
     }
 
+    private bool CheckDiceLimitSatisfied(DiceHolder diceHolder)
+    {
+        switch (diceHolder.limit)
+        {
+            case DiceLimit.Over4:
+                if (value < 4)
+                {
+                    transform.position = origin;
+                    return false;
+                }
+
+                break;
+            case DiceLimit.Even:
+                if (value % 2 != 0)
+                {
+                    transform.position = origin;
+                    return false;
+                }
+
+                break;
+            case DiceLimit.Odd:
+                if (value % 2 == 0)
+                {
+                    transform.position = origin;
+                    return false;
+                }
+
+                break;
+        }
+
+        return true;
+    }
+
     public void OnPointerClick(PointerEventData eventData)
     {
-        if (isDragging || canRoll) return;
+        if (isDragging || canRoll || value > 0) return;
 
         value = Random.Range(0, maxValue) + 1;
         tmp.text = $"{value}";
@@ -108,6 +145,14 @@ public class DiceScript : MonoBehaviour, IDragHandler, IEndDragHandler, IPointer
     public void Reset()
     {
         isDragging = canRoll = isLocked = false;
+        if (origin != Vector2.zero)
+        {
+            transform.position = origin;
+        }
+
         transform.parent = dicePanel.transform;
+
+        tmp.text = "";
+        value = 0;
     }
 }
